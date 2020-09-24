@@ -1,94 +1,41 @@
-const canvas = document.querySelector('canvas');
-const c = canvas.getContext('2d');
+import Character from './character.js';
+import Particle from './particle.js';
+import { BULLET_SPEED, PLAYER_SPEED, PARTICLE_SPEED } from './constants.js';
 
+const canvas = document.querySelector('canvas');
+const context = canvas.getContext('2d');
+const c = context;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let controls = {
+const x = canvas.width/2;
+const y = canvas.height/2;
+
+const controls = {
     rightPressed: false,
     leftPressed: false,
     upPressed: false,
     downPressed: false
 }
+
+const playerVelocity = {
+    x: 0,
+    y: 0
+}
+
 const scoreEl = document.querySelector('#scoreEl');
 const startGameBtn = document.querySelector('#startGameBtn');
 const modalEl = document.querySelector('#modalEl');
 const bigScoreEl = document.querySelector('#bigScoreEl');
 
-startGameBtn
-
-class Player {
-    constructor(x, y, radius, color) {
-        this.x = x,
-        this.y = y,
-        this.radius = radius,
-        this.color = color
-    }
-    draw() {
-        c.beginPath();
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        c.fillStyle = this.color;
-        c.fill();
-    }
-}
-
-class Projectile {
-    constructor(x, y, radius, color, velocity) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.color = color;
-        this.velocity = velocity;
-    }
-    draw() {
-        c.beginPath();
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        c.fillStyle = this.color;
-        c.fill();
-    }
-
-    update() { 
-        this.draw();
-        this.x = this.x + this.velocity.x;
-        this.y = this.y + this.velocity.y;
-    }
-}
-
-
-class Enemy {
-    constructor(x, y, radius, color, velocity) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.color = color;
-        this.velocity = velocity;
-    }
-    draw() {
-        c.beginPath();
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        c.fillStyle = this.color;
-        c.fill();
-    }
-
-    update() { 
-        this.draw();
-        this.x = this.x + this.velocity.x;
-        this.y = this.y + this.velocity.y;
-    }
-}
-
-
-const x = canvas.width/2;
-const y = canvas.height/2;
-
-let player = new Player(x, y, 15, 'white');
+let player = new Character(x, y, 15, 'white', playerVelocity, context);;
 
 let projectiles = [];
 let enemies = [];
 let particles = [];
 
 function init() {
-    player = new Player(x, y, 15, 'white');
+    player = new Character(x, y, 15, 'white', playerVelocity, context);
     projectiles = [];
     enemies = [];
     particles = [];
@@ -100,7 +47,6 @@ function init() {
 function spawnEnemies() {
     setInterval(() => {
         const radius = 10 + Math.random() * 30;
-        console.log('go');
         let x;
         let y;
         if(Math.random() < 0.5) {
@@ -121,39 +67,31 @@ function spawnEnemies() {
             x: Math.cos(angle),
             y: Math.sin(angle)
         }
-        enemies.push(new Enemy(x, y, radius, color, velocity));
+        enemies.push(new Character(x, y, radius, color, velocity, context));
     }, 1000);
 }
-// broser know about window by default
-// you don't need to specify window.
-// const projectile = new Projectile(x, y, 5, 'red', 
-// {
-//     x: 1,
-//     y: 1
-// }
-// );
+
 let animationId;
 let score = 0;
 function animate() {
     animationId = requestAnimationFrame(animate);
 
-    // console.log(controls.leftPressed);
-
     c.fillStyle = 'rgba(0, 0, 0, 0.1)';
     c.fillRect(0, 0, canvas.width, canvas.height);
     if(controls.leftPressed) {
-        player.x -= 5;
+        playerVelocity.x = -PLAYER_SPEED;
+    } else if(controls.rightPressed) {
+        playerVelocity.x = PLAYER_SPEED;
+    } else if(controls.upPressed) {
+        playerVelocity.y = -PLAYER_SPEED;
+    } else if(controls.downPressed) {
+        playerVelocity.y = PLAYER_SPEED;
+    } else {
+        playerVelocity.x = 0;
+        playerVelocity.y = 0;
     }
-    if(controls.rightPressed) {
-        player.x += 5;
-    }    
-    if(controls.upPressed) {
-        player.y -= 5;
-    }
-    if(controls.downPressed) {
-        player.y += 5;
-    }
-    player.draw();
+    
+    player.update();
     particles.forEach((particle, index) => {
         if(particle.alpha <= 0) {
             particles.splice(index, 1);
@@ -187,17 +125,20 @@ function animate() {
             const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y);
             if(dist - enemy.radius - projectile.radius < 1) {
                 // this is a trick for the flashing effect
-// create explosions! 
+                // create explosions! 
                 for (let i = 0; i < enemy.radius * 2; i++) {
                     particles.push(
                         new Particle(projectile.x, 
                             projectile.y, 
                             // radius 0 to 2
                             Math.random() * 2,  
-                            enemy.color, {
-                            x: (Math.random() - 0.5) * (Math.random() * 8),
-                            y: (Math.random() - 0.5) * (Math.random() * 8)
-                        }));
+                            enemy.color, 
+                            {
+                                x: (Math.random() - 0.5) * (Math.random() * PARTICLE_SPEED),
+                                y: (Math.random() - 0.5) * (Math.random() * PARTICLE_SPEED)
+                            },
+                            context
+                        ));
                     }
 
                 if(enemy.radius - 10 > 5) {
@@ -229,56 +170,24 @@ window.addEventListener('click', (event) => {
     // const projectile = new Projectile(event.clientX, event.clientY, 5, 'red', null);
     // atan2 y is the first argument
     const angle = Math.atan2(
-        event.clientY-player.y,
-        event.clientX-player.x
+        event.clientY - player.y,
+        event.clientX - player.x
         );
 
-    const velocity = {
-        x: Math.cos(angle) * 9,
-        y: Math.sin(angle) * 9
-    }
-    // this is how we do the bullets !!!!
-    projectiles.push(new Projectile(
+    projectiles.push(new Character(
         player.x,
         player.y, 
         5,
         'white',
-        velocity
+        {
+            x: Math.cos(angle) * BULLET_SPEED,
+            y: Math.sin(angle) * BULLET_SPEED
+        },
+        context
     ));
 
 });
 
-const friction = 0.97;
-
-class Particle {
-    constructor(x, y, radius, color, velocity) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.color = color;
-        this.velocity = velocity;
-
-        this.alpha = 1;
-    }
-    draw() {
-        c.save();
-        c.globalAlpha = this.alpha;
-        c.beginPath();
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        c.fillStyle = this.color;
-        c.fill();
-        c.restore();
-    }
-
-    update() { 
-        this.draw();
-        this.velocity.x *= friction;
-        this.velocity.y *= friction;
-        this.x = this.x + this.velocity.x;
-        this.y = this.y + this.velocity.y;
-        this.alpha -= 0.01;
-    }
-}
 // CONTROLS
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);

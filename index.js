@@ -4,6 +4,12 @@ const c = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+let controls = {
+    rightPressed: false,
+    leftPressed: false,
+    upPressed: false,
+    downPressed: false
+}
 const scoreEl = document.querySelector('#scoreEl');
 const startGameBtn = document.querySelector('#startGameBtn');
 const modalEl = document.querySelector('#modalEl');
@@ -130,8 +136,23 @@ let animationId;
 let score = 0;
 function animate() {
     animationId = requestAnimationFrame(animate);
+
+    // console.log(controls.leftPressed);
+
     c.fillStyle = 'rgba(0, 0, 0, 0.1)';
     c.fillRect(0, 0, canvas.width, canvas.height);
+    if(controls.leftPressed) {
+        player.x -= 5;
+    }
+    if(controls.rightPressed) {
+        player.x += 5;
+    }    
+    if(controls.upPressed) {
+        player.y -= 5;
+    }
+    if(controls.downPressed) {
+        player.y += 5;
+    }
     player.draw();
     particles.forEach((particle, index) => {
         if(particle.alpha <= 0) {
@@ -208,8 +229,8 @@ window.addEventListener('click', (event) => {
     // const projectile = new Projectile(event.clientX, event.clientY, 5, 'red', null);
     // atan2 y is the first argument
     const angle = Math.atan2(
-        event.clientY-canvas.height/2,
-        event.clientX-canvas.width/2
+        event.clientY-player.y,
+        event.clientX-player.x
         );
 
     const velocity = {
@@ -218,8 +239,8 @@ window.addEventListener('click', (event) => {
     }
     // this is how we do the bullets !!!!
     projectiles.push(new Projectile(
-        x,
-        y, 
+        player.x,
+        player.y, 
         5,
         'white',
         velocity
@@ -256,6 +277,39 @@ class Particle {
         this.x = this.x + this.velocity.x;
         this.y = this.y + this.velocity.y;
         this.alpha -= 0.01;
+    }
+}
+// CONTROLS
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+function keyDownHandler(e) {
+    e.preventDefault();
+    if(e.key == "Right" || e.key == "ArrowRight") {
+        controls.rightPressed = true;
+    }
+    else if(e.key == "Left" || e.key == "ArrowLeft") {
+        controls.leftPressed = true;
+    }
+    else if(e.key == "Up" || e.key == "ArrowUp") {
+        controls.upPressed = true;
+    }
+    else if(e.key == "Down" || e.key == "ArrowDown") {
+        controls.downPressed = true;
+    }
+}
+function keyUpHandler(e) {
+    e.preventDefault();
+    if(e.key == "Right" || e.key == "ArrowRight") {
+        controls.rightPressed = false;
+    }
+    else if(e.key == "Left" || e.key == "ArrowLeft") {
+        controls.leftPressed = false;
+    }
+    else if(e.key == "Up" || e.key == "ArrowUp") {
+        controls.upPressed = false;
+    }
+    else if(e.key == "Down" || e.key == "ArrowDown") {
+        controls.downPressed = false;
     }
 }
 

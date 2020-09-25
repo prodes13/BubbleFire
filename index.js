@@ -28,14 +28,14 @@ const startGameBtn = document.querySelector('#startGameBtn');
 const modalEl = document.querySelector('#modalEl');
 const bigScoreEl = document.querySelector('#bigScoreEl');
 
-let player = new Character(x, y, 15, 'white', playerVelocity, context);;
-
+let player;
 let projectiles = [];
 let enemies = [];
 let particles = [];
 
 function init() {
-    player = new Character(x, y, 15, 'white', playerVelocity, context);
+    player = new Particle(x, y, 15, 'white', playerVelocity, context, 'player');
+    console.log(player.name);
     projectiles = [];
     enemies = [];
     particles = [];

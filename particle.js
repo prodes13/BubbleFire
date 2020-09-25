@@ -2,9 +2,10 @@ import Character from './character.js';
 import { FRICTION } from './constants.js';
 
 class Particle extends Character{
-    constructor(x, y, radius, color, velocity, context) {
+    constructor(x, y, radius, color, velocity, context, name=null) {
         super(x, y, radius, color, velocity, context);
         this.alpha = 1;
+        this.name = name;
     }
     draw() {
         this.context.save();
@@ -22,7 +23,8 @@ class Particle extends Character{
         this.velocity.y *= FRICTION;
         this.x = this.x + this.velocity.x;
         this.y = this.y + this.velocity.y;
-        this.alpha -= 0.01;
+        if(!this.name)
+            this.alpha -= 0.01;
     }
 }
 

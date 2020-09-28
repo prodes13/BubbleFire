@@ -28,6 +28,9 @@ const startGameBtn = document.querySelector('#startGameBtn');
 const modalEl = document.querySelector('#modalEl');
 const bigScoreEl = document.querySelector('#bigScoreEl');
 
+const playerName = document.querySelector('#playerName');
+const addHighScore = document.querySelector('#addHighScore');
+
 let player;
 let projectiles = [];
 let enemies = [];
@@ -228,4 +231,28 @@ startGameBtn.addEventListener('click', (event) => {
     modalEl.style.display = 'none';
     animate();
     spawnEnemies();
+});
+
+
+addHighScore.addEventListener('click', (event) => {
+    console.log({
+        name: playerName.value,
+        score: score
+    });
+    const data = {
+        name: playerName.value,
+        score: score
+    };
+// content type is important!!!
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    }
+
+    fetch("http://localhost:3300/new-score", options).then(res => {
+        console.log("Request complete! response:", res);
+    });
 });

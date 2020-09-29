@@ -15,7 +15,13 @@ const controls = {
     rightPressed: false,
     leftPressed: false,
     upPressed: false,
-    downPressed: false
+    downPressed: false,
+    keys: false
+}
+
+const mouse = {
+    x: 0,
+    y: 0
 }
 
 const playerVelocity = {
@@ -81,19 +87,34 @@ function animate() {
 
     c.fillStyle = 'rgba(0, 0, 0, 0.1)';
     c.fillRect(0, 0, canvas.width, canvas.height);
-    if(controls.leftPressed) {
-        playerVelocity.x = -PLAYER_SPEED;
-    } else if(controls.rightPressed) {
-        playerVelocity.x = PLAYER_SPEED;
-    } else if(controls.upPressed) {
-        playerVelocity.y = -PLAYER_SPEED;
-    } else if(controls.downPressed) {
-        playerVelocity.y = PLAYER_SPEED;
-    } else {
-        playerVelocity.x = 0;
-        playerVelocity.y = 0;
+
+    if(controls.keys) {
+        if(controls.leftPressed) {
+            playerVelocity.x = -PLAYER_SPEED;
+        } else if(controls.rightPressed) {
+            playerVelocity.x = PLAYER_SPEED;
+        } else if(controls.upPressed) {
+            playerVelocity.y = -PLAYER_SPEED;
+        } else if(controls.downPressed) {
+            playerVelocity.y = PLAYER_SPEED;
+        } else {
+            playerVelocity.x = 0;
+            playerVelocity.y = 0;
+        }
     }
-    
+    // new control type 
+    const data = Math.hypot(player.x - mouse.x, player.y - mouse.y);
+    console.log(data);
+    let velocity = data/1.9;
+    const angle2 = Math.atan2(
+        mouse.y - player.y,
+        mouse.x - player.x
+        );
+    playerVelocity.x += velocity * Math.cos(angle2) * 0.005
+    playerVelocity.y += velocity * Math.sin(angle2) * 0.005
+
+    // end of new controls
+
     player.update();
     particles.forEach((particle, index) => {
         if(particle.alpha <= 0) {
@@ -168,6 +189,15 @@ function animate() {
         });
     })
 }
+
+window.addEventListener('mousemove', (event) => {
+    // // var rect = canvas.getBoundingClientRect();
+    // var mouseX = event.clientX - rect.top;
+    // var mouseY = event.clientY - rect.left;
+    // din cauza la css, este tot aia
+    mouse.x = event.clientX;
+    mouse.y = event.clientY;
+})
 
 window.addEventListener('click', (event) => {
     // const projectile = new Projectile(event.clientX, event.clientY, 5, 'red', null);

@@ -257,6 +257,19 @@ function keyUpHandler(e) {
 
 
 startGameBtn.addEventListener('click', (event) => {
+    const rbs = document.querySelectorAll('input[name="controlType"]');
+            let selectedValue;
+            for (const rb of rbs) {
+                if (rb.checked) {
+                    if (rb.id === 'mouse') {
+                        controls.keys = false;
+                    } else {
+                        controls.keys = true;
+                    }
+                }
+            }
+
+
     init();
     modalEl.style.display = 'none';
     animate();

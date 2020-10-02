@@ -173,6 +173,9 @@ function animate() {
                         radius: enemy.radius-10
                     });
                     // enemy.radius -= 10;
+                    let hitSound = new Audio("./sounds/skill_hit.mp3");
+                    hitSound.play()
+
                     setTimeout(() => {
                         projectiles.splice(projectileIndex, 1);
                     }, 0);
@@ -218,6 +221,9 @@ window.addEventListener('click', (event) => {
         },
         context
     ));
+    let laser = new Audio("./sounds/slimeball.wav");
+    laser.play()
+    // pool[i] = laser;
 
 });
 
